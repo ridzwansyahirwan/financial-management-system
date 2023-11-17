@@ -6,17 +6,12 @@ header("Access-Control-Allow-Headers: Content-Type");
 require_once 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if the required fields are set in the POST request
     if (isset($_POST['name'], $_POST['email'], $_POST['password'])) {
         $name = $_POST['name'];
         $email = $_POST['email'];
         $password = $_POST['password'];
 
-        // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        // Perform validation as needed
-
         $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$hashedPassword')";
 
         if ($conn->query($sql) === TRUE) {

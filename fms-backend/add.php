@@ -11,8 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = $_POST['name'];
         $category = $_POST['category'];
         $amount = $_POST['amount'];
-
-        // Prepared statement to insert data
+        
         $stmt = $conn->prepare("INSERT INTO expenses (date, name, category, amount) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("sssd", $date, $name, $category, $amount);
 
