@@ -18,6 +18,7 @@ function Expense() {
     const [updatedCategory, setUpdatedCategory] = useState('');
     const categories = ['Housing', 'Utilities', 'Transportation', 'Food', 'Healthcare'];
     const [showModal, setShowModal] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
     const backgroundStyles = {
         backgroundImage: `url(${backgroundImage})`,
@@ -134,6 +135,44 @@ function Expense() {
         setShowModal(false);
     };
 
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+          direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+      };
+      
+      const sortedExpenses = () => {
+        const sortedData = [...expenses];
+        if (sortConfig.key === 'amount') {
+          sortedData.sort((a, b) => {
+            const keyA = parseFloat(a.amount);
+            const keyB = parseFloat(b.amount);
+            if (sortConfig.direction === 'asc') {
+              return keyA - keyB;
+            } else {
+              return keyB - keyA;
+            }
+          });
+        } else if (sortConfig.key) {
+          sortedData.sort((a, b) => {
+            const keyA = a[sortConfig.key];
+            const keyB = b[sortConfig.key];
+            if (sortConfig.direction === 'asc') {
+              if (keyA < keyB) return -1;
+              if (keyA > keyB) return 1;
+              return 0;
+            } else {
+              if (keyA > keyB) return -1;
+              if (keyA < keyB) return 1;
+              return 0;
+            }
+          });
+        }
+        return sortedData;
+      };
+
     return (
         <div className="header" style={backgroundStyles}>
             <Navbar />
@@ -145,43 +184,42 @@ function Expense() {
                     <table className="table table-striped">
                         <thead className="thead-dark">
                             <tr>
-                                <th>#</th>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Amount (RM)</th>
-                                <th>Action</th>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th onClick={() => handleSort('category')}>Category</th>
+                            <th onClick={() => handleSort('amount')}>Amount (RM)</th>
+                            <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {Array.isArray(expenses) && expenses.length > 0 ? (
-                                expenses.map((expense, index) => (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{expense.date}</td>
-                                        <td>{expense.name.toUpperCase()}</td>
-                                        <td>{expense.category.toUpperCase()}</td>
-                                        <td>{expense.amount}</td>
-                                        <td>
-                                        <button onClick={() => handleEdit(expense.id, expense.date, expense.name, expense.category, expense.amount)} className="btn btn-primary" style={{ padding: '10px', borderRadius: '90%', width: '50px', height: '50px' }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pen" viewBox="0 0 16 16">
-                                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"/>
-                                            </svg>
-                                        </button> &nbsp;
-                                        <button onClick={() => confirmDelete(expense.id)} className="btn btn-danger" style={{ padding: '10px', borderRadius: '90%', width: '50px', height: '50px' }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
-                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-                                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-                                            </svg>
-                                        </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
+                            {Array.isArray(expenses) && expenses.length > 0 ? (sortedExpenses().map((expense, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{expense.date}</td>
+                                    <td>{expense.name.toUpperCase()}</td>
+                                    <td>{expense.category.toUpperCase()}</td>
+                                    <td>{expense.amount}</td>
+                                    <td>
+                                    <button onClick={() => handleEdit(expense.id, expense.date, expense.name, expense.category, expense.amount)} className="btn btn-primary" style={{ padding: '10px', borderRadius: '90%', width: '50px', height: '50px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pen" viewBox="0 0 16 16">
+                                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001zm-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708l-1.585-1.585z"/>
+                                        </svg>
+                                    </button> &nbsp;
+                                    <button onClick={() => confirmDelete(expense.id)} className="btn btn-danger" style={{ padding: '10px', borderRadius: '90%', width: '50px', height: '50px' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                        </svg>
+                                    </button>
+                                    </td>
+                                </tr>
+                                    ))
+                                ) : (
                                 <tr>
                                     <td colSpan="6">No expenses found</td>
                                 </tr>
-                            )}
+                                )}
                         </tbody>
                     </table>
                     <Modal show={showModal} onHide={() => setShowModal(false)}>
