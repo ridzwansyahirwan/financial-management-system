@@ -5,6 +5,7 @@ import '../style/dashboard.css';
 import backgroundImage from './latar.jpg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 
@@ -41,20 +42,26 @@ function Expense() {
     const handleDelete = (expenseId) => {
         fetch(`http://localhost/fms-backend/delete.php?id=${expenseId}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Deletion response:', data);
-                // Optionally update the state or re-fetch the expenses
-            })
-            .catch(error => {
-                console.error('Error deleting expense:', error);
-            });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Deletion response:', data);
+            if (data && data.message === "Expense deleted successfully") {
+                alert('Expense deleted successfully!');
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting expense:', error);
+        });
     };
     
     const handleAddClick = () => {
@@ -90,12 +97,7 @@ function Expense() {
                                         <td>{expense.category.toUpperCase()}</td>
                                         <td>{expense.amount}</td>
                                         <td>
-                                        <button
-                                            onClick={() => handleDelete(expense.id)}
-                                            className="btn btn-danger"
-                                        >
-                                            Delete
-                                        </button>
+                                        <button onClick={() => handleDelete(expense.id)} className="btn btn-danger"> Delete</button>
                                         </td>
                                     </tr>
                                 ))
